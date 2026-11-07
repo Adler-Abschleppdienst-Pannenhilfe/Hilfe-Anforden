@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Adler Abschleppdienst & Pannenhilfe – Hilfe anfordern</title>
+<style>
+:root{--bg:#eef2f6;--card:#fff;--ink:#14212e;--muted:#55657a;--line:#c9d3df;--accent:#f2a900;--accent-ink:#14212e;--wa:#1a7f4b;--wa-ink:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1822;--card:#17232f;--ink:#eaf0f6;--muted:#9fb0c3;--line:#2c3c4d;--accent:#f2b51f;--accent-ink:#14212e;--wa:#2fb36e;--wa-ink:#06210f;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1822;--card:#17232f;--ink:#eaf0f6;--muted:#9fb0c3;--line:#2c3c4d;--accent:#f2b51f;--accent-ink:#14212e;--wa:#2fb36e;--wa-ink:#06210f;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.45}
+main{max-width:520px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:1.6rem;line-height:1.2;margin:8px 0 4px}
+.sub{color:var(--muted);margin:0 0 18px}
+.call{display:block;text-align:center;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:1.1rem;padding:14px;border-radius:10px;text-decoration:none;margin-bottom:18px}
+form{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+label{display:block;font-weight:600;margin:14px 0 6px}
+label:first-of-type{margin-top:0}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px}
+input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.row{display:flex;gap:8px}
+.row input{flex:1}
+.loc{background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:0 12px;font:inherit;cursor:pointer;white-space:nowrap}
+.hint{font-size:.85rem;color:var(--muted);margin:6px 0 0;min-height:1.2em}
+.send{width:100%;margin-top:20px;background:var(--wa);color:var(--wa-ink);border:0;border-radius:10px;font:inherit;font-weight:700;font-size:1.1rem;padding:15px;cursor:pointer}
+.note{font-size:.85rem;color:var(--muted);margin-top:14px}
+.err{color:#b3261e;font-size:.9rem;margin-top:10px;min-height:1.2em}
+@media (prefers-color-scheme:dark){.err{color:#ff8a80}}
+</style>
+</head>
+<body>
+<main>
+<h1>Abschleppdienst & Pannenhilfe</h1>
+<p class="sub">Rund um die Uhr erreichbar. Füllen Sie das Formular aus, wir melden uns per WhatsApp.</p>
+<a class="call" href="tel:+491624340038">Sofort anrufen</a>
+<form id="f" novalidate>
+<label for="ort">Wo stehen Sie?</label>
+<div class="row"><input id="ort" name="ort" autocomplete="street-address" placeholder="Straße, Ort"><button type="button" class="loc" id="loc">Mein Standort</button></div>
+<p class="hint" id="hint"></p>
+<label for="fz">Fahrzeug (Marke, Modell)</label>
+<input id="fz" name="fz" placeholder="z. B. VW Golf">
+<label for="gw">Gewicht in kg (optional)</label>
+<input id="gw" name="gw" inputmode="numeric" placeholder="falls bekannt, z. B. 1500">
+<label for="prob">Was brauchen Sie?</label>
+<select id="prob" name="prob">
+<option>Abschleppen / Transport</option>
+<option>Panne / Batterie leer</option>
+<option>Unfall</option>
+<option>Reifenpanne</option>
+<option>Kein Kraftstoff</option>
+<option>Sonstiges</option>
+</select>
+<label for="ziel">Wohin soll das Fahrzeug?</label>
+<input id="ziel" name="ziel" placeholder="Werkstatt oder Adresse">
+<label for="tel">Ihre Telefonnummer</label>
+<input id="tel" name="tel" type="tel" autocomplete="tel" placeholder="+49 ...">
+<p class="err" id="err" role="alert"></p>
+<button type="submit" class="send">Per WhatsApp senden</button>
+<p class="note">Beim Senden öffnet sich WhatsApp mit Ihrer Nachricht. Ihre Angaben werden nur an uns gesendet und nicht auf dieser Seite gespeichert.</p>
+</form>
+</main>
+<script>
+var NUMBER = "491624340038";
+var mapsLink = "";
+var ort = document.getElementById("ort"), hint = document.getElementById("hint"), err = document.getElementById("err");
+document.getElementById("loc").addEventListener("click", function () {
+  if (!navigator.geolocation) { hint.textContent = "Standort wird nicht unterstützt. Bitte Adresse eintippen."; return; }
+  hint.textContent = "Standort wird ermittelt …";
+  navigator.geolocation.getCurrentPosition(function (p) {
+    var la = p.coords.latitude.toFixed(5), lo = p.coords.longitude.toFixed(5);
+    mapsLink = "https://maps.google.com/?q=" + la + "," + lo;
+    hint.textContent = "Standort erfasst. Sie können zusätzlich die Adresse eintippen.";
+  }, function () {
+    hint.textContent = "Standort nicht verfügbar. Bitte Adresse eintippen.";
+  }, { enableHighAccuracy: true, timeout: 10000 });
+});
+document.getElementById("f").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var v = function (id) { return document.getElementById(id).value.trim(); };
+  if (!v("ort") && !mapsLink) { err.textContent = "Bitte geben Sie Ihren Standort an."; return; }
+  if (!v("tel")) { err.textContent = "Bitte geben Sie Ihre Telefonnummer an."; return; }
+  err.textContent = "";
+  var lines = ["Hallo, ich brauche Hilfe.",
+    "Standort: " + (v("ort") || "siehe Karte"),
+    mapsLink ? "Karte: " + mapsLink : "",
+    "Fahrzeug: " + (v("fz") || "-"),
+    v("gw") ? "Gewicht: " + v("gw") + " kg" : "",
+    "Anliegen: " + v("prob"),
+    "Ziel: " + (v("ziel") || "-"),
+    "Telefon: " + v("tel")].filter(Boolean);
+  var a = document.createElement("a");
+  a.href = "https://wa.me/" + NUMBER + "?text=" + encodeURIComponent(lines.join("\n"));
+  a.target = "_blank"; a.rel = "noopener";
+  document.body.appendChild(a); a.click(); a.remove();
+});
+</script>
+</body>
+</html>
